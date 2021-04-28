@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>AI</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@2.0.0/dist/tf.min.js"></script>
+  </head>
+  <body>
+   <script>
+      var T = [20, 21, 22, 23];
+      var sales = [40, 42, 44, 46];
+      var cause = tf.tensor(T);
+      var result = tf.tensor(sales);
+
+      var X = tf.input({shape:[1]});
+      var Y = tf.layers.dense({units:1}).apply(X);
+      var model = tf.model({inputs:X, outputs:Y});
+      var compileParam = {optimizer: tf.train.adam(), loss: tf.losses.meanSquaredError};
+      model.compile(compileParam);
+
+      var fitParam = {
+        epochs:100,
+        callbacks:{
+          onEpochEnd:
+            function(epoch, logs){
+              console.log('epoch', epoch, logs, 'RMSE==>', Math.sqrt(logs.loss));
+            }
+        }
+      };
+      model.fit(cause, result, fitParam).then(function(res){
+        var nextT = [15, 16, 17, 18, 19];
+        var nextCause = tf.tensor2d(nextT, [nextT.length, 1]);
+        var nextResult = model.predict(nextCause);
+        nextResult.print();
+        model.save('localstorage://lemon');
+      })
+    </script>
+  </body>
+</html>
